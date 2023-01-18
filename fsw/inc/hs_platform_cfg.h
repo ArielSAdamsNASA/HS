@@ -76,7 +76,7 @@
  *       This parameter can't be larger than 255.
  */
 #define HS_IDLE_TASK_PRIORITY 252
-
+#ifndef CFE_EDS_ENABLED_BUILD
 /**
  * \brief Maximum reported execution counters
  *
@@ -98,7 +98,6 @@
  *       #CFE_PLATFORM_TBL_MAX_SNGL_TABLE_SIZE parameter
  */
 #define HS_MAX_EXEC_CNT_SLOTS 32
-
 /**
  * \brief Maximum message action types
  *
@@ -121,7 +120,6 @@
  *       #CFE_PLATFORM_TBL_MAX_SNGL_TABLE_SIZE parameter
  */
 #define HS_MAX_MSG_ACT_TYPES 8
-
 /**
  * \brief Maximum message action size (in bytes)
  *
@@ -144,7 +142,6 @@
  *       #CFE_PLATFORM_TBL_MAX_SNGL_TABLE_SIZE parameter
  */
 #define HS_MAX_MSG_ACT_SIZE 16
-
 /**
  * \brief Maximum number of monitored applications
  *
@@ -168,7 +165,6 @@
  *       #CFE_PLATFORM_TBL_MAX_SNGL_TABLE_SIZE parameter
  */
 #define HS_MAX_MONITORED_APPS 32
-
 /**
  * \brief Maximum number of monitored events
  *
@@ -192,7 +188,7 @@
  *       #CFE_PLATFORM_TBL_MAX_SNGL_TABLE_SIZE parameter
  */
 #define HS_MAX_MONITORED_EVENTS 16
-
+#endif
 /**
  * \brief Watchdog Timeout Value
  *

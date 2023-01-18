@@ -287,8 +287,8 @@ void HS_HousekeepingReq(const CFE_SB_Buffer_t *BufPtr)
         /*
         ** Timestamp and send housekeeping packet
         */
-        CFE_SB_TimeStampMsg(&HS_AppData.HkPacket.TlmHeader.Msg);
-        CFE_SB_TransmitMsg(&HS_AppData.HkPacket.TlmHeader.Msg, true);
+        CFE_SB_TimeStampMsg(CFE_MSG_PTR(HS_AppData.HkPacket));
+        CFE_SB_TransmitMsg(CFE_MSG_PTR(HS_AppData.HkPacket), true);
 
     } /* end HS_VerifyMsgLength if */
 }
@@ -609,7 +609,7 @@ void HS_ResetResetsPerformedCmd(const CFE_SB_Buffer_t *BufPtr)
 void HS_SetMaxResetsCmd(const CFE_SB_Buffer_t *BufPtr)
 {
     size_t                ExpectedLength = sizeof(HS_SetMaxResetsCmd_t);
-    HS_SetMaxResetsCmd_t *CmdPtr         = NULL;
+    HS_SetMaxResets_Payload_t *CmdPtr         = NULL;
 
     /*
     ** Verify message packet length
@@ -617,7 +617,7 @@ void HS_SetMaxResetsCmd(const CFE_SB_Buffer_t *BufPtr)
     if (HS_VerifyMsgLength(&BufPtr->Msg, ExpectedLength))
     {
         HS_AppData.CmdCount++;
-        CmdPtr = ((HS_SetMaxResetsCmd_t *)BufPtr);
+        CmdPtr = &((HS_SetMaxResetsCmd_t *)BufPtr)->Payload;
 
         HS_SetCDSData(HS_AppData.CDSData.ResetsPerformed, CmdPtr->MaxResets);
 
