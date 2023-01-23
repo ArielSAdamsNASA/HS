@@ -64,7 +64,10 @@ typedef struct
     CFE_MSG_CommandHeader_t CmdHeader; /**< \brief Command header */
 } HS_NoArgsCmd_t;
 
-/**
+#ifdef CFE_EDS_ENABLED_BUILD
+#include "hs_eds_typedefs.h"
+#else
+
  *  \brief Set Max Resets Command
  *
  *  For command details see #HS_SET_MAX_RESETS_CC
@@ -76,7 +79,7 @@ typedef struct
     uint16 MaxResets; /**< \brief Maximum Resets */
     uint16 Padding;   /**< \brief Structure padding */
 } HS_SetMaxResetsCmd_t;
-
+#endif
 /**\}*/
 
 /**

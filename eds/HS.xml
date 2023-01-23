@@ -1,0 +1,612 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    GSC-18128-1, "Core Flight Executive Version 6.7"
+    LEW-19710-1, "CCSDS electronic data sheet implementation"
+
+    Copyright (c) 2006-2019 United States Government as represented by
+    the Administrator of the National Aeronautics and Space Administration.
+    All Rights Reserved.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+    This document adheres to the Electronic Data Sheet (EDS) XML schema
+    as prescribed in CCSDS book 876.0.
+
+    Purpose:
+      This describes all interface objects for the Executive Services (CFE_ES)
+      core application
+
+-->
+<PackageFile xmlns="http://www.ccsds.org/schema/sois/seds">
+  <Package name="HS" shortDescription="Health and Safety">
+
+    <DataTypeSet>
+
+      <ContainerDataType name="CMD" baseType="CFE_HDR/CommandHeader">
+      </ContainerDataType>
+
+       <ContainerDataType name="HkTlm_Payload" shortDescription="HK housekeeping">
+        <EntryList>
+          <Entry name="CmdCounter" type="BASE_TYPES/uint8" shortDescription="Count of valid commands received" />
+          <Entry name="ErrCounter" type="BASE_TYPES/uint8" shortDescription="Count of invalid commands received" />
+          <Entry name="CombinedPacketsSent" type="BASE_TYPES/uint8" shortDescription="Count of combined tlm pkts sent" />
+          <Entry name="MissingDataCtr" type="BASE_TYPES/uint8" shortDescription="Number of times missing data was detected" />
+          <Entry name="MemPoolHandle" type="BASE_TYPES/uint8" shortDescription="Memory pool handle used to get mempool diags" />
+        </EntryList>
+      </ContainerDataType>
+
+      <ContainerDataType name="HousekeepingPkt" baseType="CFE_HDR/TelemetryHeader">
+        <EntryList>
+          <Entry type="HkTlm_Payload" name="Payload" />
+        </EntryList>
+      </ContainerDataType>
+
+      <ArrayDataType name="MsgArray" dataTypeRef="BASE_TYPES/uint8">
+       <DimensionList>
+         <Dimension size="${HS/MAX_MSG_ACT_SIZE}" />
+       </DimensionList>
+      </ArrayDataType>
+
+      <ContainerDataType name="MATMsgBuf" shortDescription="Message Action Table buffer">
+       <EntryList>
+        <Entry name="Message" type="CFE_HDR/CommandHeader" shortDescription="If entry contains message" />
+       </EntryList>
+      </ContainerDataType>
+
+      <ContainerDataType name="MATEntry" shortDescription="Message Actions Table (MAT) Entry">
+       <EntryList>
+          <Entry name="EnableState" type="BASE_TYPES/uint16" shortDescription="If entry contains message" />
+          <Entry name="Cooldown" type="BASE_TYPES/uint16" shortDescription="Minimum rate at which message can be sent" />
+          <Entry name="MsgBuf" type="MATMsgBuf" shortDescription="Message to be sent" />
+        </EntryList>
+      </ContainerDataType>
+
+      <ArrayDataType name="MsgActs_Tbl" dataTypeRef="MATEntry">
+        <DimensionList>
+          <Dimension size="${HS/MAX_MSG_ACT_TYPES}" />
+        </DimensionList>
+      </ArrayDataType>
+
+      <ContainerDataType name="EMTEntry" shortDescription="Event Monitor Table (EMT) Entry">
+       <EntryList>
+         <Entry name="AppName" type="BASE_TYPES/ApiName" shortDescription="Name of application generating event" />
+         <Entry name="NullTerm" type="BASE_TYPES/uint16" shortDescription="Buffer of nulls to terminate string" />
+         <Entry name="EventID" type="BASE_TYPES/uint16" shortDescription="Event number of monitored event" />
+         <Entry name="ActionType" type="BASE_TYPES/uint16" shortDescription="Action to take if event is received" />
+       </EntryList>
+      </ContainerDataType>
+
+      <ArrayDataType name="EventMon_Tbl" dataTypeRef="EMTEntry">
+       <DimensionList>
+         <Dimension size="${HS/MAX_MONITORED_EVENTS}" />
+       </DimensionList>
+      </ArrayDataType>
+
+      <ContainerDataType name="AMTEntry" shortDescription="Application Monitor Table (AMT) Entry">
+       <EntryList>
+         <Entry name="AppName" type="BASE_TYPES/ApiName" shortDescription="Name of application to be monitored" />
+         <Entry name="NullTerm" type="BASE_TYPES/uint16" shortDescription="Buffer of nulls to terminate string" />
+         <Entry name="CycleCount" type="BASE_TYPES/uint16" shortDescription="Number of cycles before application is missing" />
+         <Entry name="ActionType" type="BASE_TYPES/uint16" shortDescription="Action to take if application is missing" />
+       </EntryList>
+      </ContainerDataType>
+
+      <ArrayDataType name="AppMon_Tbl" dataTypeRef="AMTEntry">
+       <DimensionList>
+         <Dimension size="${HS/MAX_MONITORED_APPS}" />
+       </DimensionList>
+      </ArrayDataType>
+
+      <ContainerDataType name="XCTEntry" shortDescription="Execution Counters Table (XCT) Entry">
+       <EntryList>
+         <Entry name="ResourceName" type="BASE_TYPES/ApiName" shortDescription="Name of resource being monitored" />
+         <Entry name="NullTerm" type="BASE_TYPES/uint32" shortDescription="Buffer of nulls to terminate string" />
+         <Entry name="ResourceType" type="BASE_TYPES/uint32" shortDescription="Type of execution counter" />
+       </EntryList>
+      </ContainerDataType>
+
+      <ArrayDataType name="ExeCount_Tbl" dataTypeRef="XCTEntry">
+       <DimensionList>
+         <Dimension size="${HS/MAX_EXEC_CNT_SLOTS}" />
+       </DimensionList>
+      </ArrayDataType>
+
+     <ContainerDataType name="SetMaxResets_Payload" shortDescription="Set Max Resets Command">
+      <EntryList>
+        <Entry name="MaxResets" type="BASE_TYPES/uint16" shortDescription="Maximum Resets" />
+        <Entry name="Padding" type="BASE_TYPES/uint16" shortDescription="Structure padding" />
+      </EntryList>
+     </ContainerDataType>
+
+      <ContainerDataType name="HousekeepingCmd" baseType="CFE_HDR/CommandHeader" shortDescription="Send Housekeeping command" />
+
+      <ContainerDataType name="NoopCmd" baseType="CMD">
+        <LongDescription>
+         \fmcmd Noop
+
+         \par Description
+              Implements the Noop command that insures the HS task is alive
+
+         \par Command Structure
+              #HS_NoArgsCmd_t
+
+         \par Command Verification
+              Successful execution of this command may be verified with
+              the following telemetry:
+              - #HS_HkPacket_t.CmdCount will increment
+              - The #HS_NOOP_INF_EID informational event message will be
+                generated when the command is received
+
+         \par Error Conditions
+              This command may fail for the following reason(s):
+              - Command packet length not as expected
+
+         \par Evidence of failure may be found in the following telemetry:
+              - #HS_HkPacket_t.CmdErrCount will increment
+              - Error specific event message #HS_LEN_ERR_EID
+
+         \par Criticality
+              None
+
+         \sa #HS_RESET_CC
+        </LongDescription>
+        <ConstraintSet>
+          <ValueConstraint entry="Sec.FunctionCode" value="0" />
+        </ConstraintSet>
+      </ContainerDataType>
+
+      <ContainerDataType name="ResetCtrsCmd" baseType="CMD">
+        <LongDescription>
+         \fmcmd Reset Counters
+
+         \par Description
+              Resets the HS housekeeping counters
+
+         \par Command Structure
+              #HS_NoArgsCmd_t
+
+         \par Command Verification
+              Successful execution of this command may be verified with
+              the following telemetry:
+              - #HS_HkPacket_t.CmdCount will be cleared
+              - The #HS_RESET_DBG_EID debug event message will be
+                generated when the command is executed
+
+         \par Error Conditions
+              This command may fail for the following reason(s):
+              - Command packet length not as expected
+
+         \par Evidence of failure may be found in the following telemetry:
+              - #HS_HkPacket_t.CmdErrCount will increment
+              - Error specific event message #HS_LEN_ERR_EID
+
+         \par Criticality
+              None
+
+         \sa #HS_NOOP_CC
+        </LongDescription>
+        <ConstraintSet>
+          <ValueConstraint entry="Sec.FunctionCode" value="1" />
+        </ConstraintSet>
+      </ContainerDataType>
+
+      <ContainerDataType name="EnableAppMonCmd" baseType="CMD">
+        <LongDescription>
+         \fmcmd Enable Applications Monitor
+
+         \par Description
+              Enables the Applications Monitor
+
+         \par Command Structure
+              #HS_NoArgsCmd_t
+
+         \par Command Verification
+              Successful execution of this command may be verified with
+              the following telemetry:
+              - #HS_HkPacket_t.CmdCount will increment
+              - #HS_HkPacket_t.CurrentAppMonState will be set to Enabled
+              - The #HS_ENABLE_APPMON_DBG_EID informational event message will be
+                generated when the command is executed
+
+         \par Error Conditions
+              This command may fail for the following reason(s):
+              - Command packet length not as expected
+
+         \par Evidence of failure may be found in the following telemetry:
+              - #HS_HkPacket_t.CmdErrCount will increment
+              - Error specific event message #HS_LEN_ERR_EID
+
+         \par Criticality
+              None
+
+         \sa #HS_DISABLE_APPMON_CC
+        </LongDescription>
+        <ConstraintSet>
+          <ValueConstraint entry="Sec.FunctionCode" value="2" />
+        </ConstraintSet>
+      </ContainerDataType>
+
+      <ContainerDataType name="DisableAppMonCmd" baseType="CMD">
+        <LongDescription>
+         \fmcmd Disable Applications Monitor
+
+         \par Description
+              Disables the Applications Monitor
+
+         \par Command Structure
+              #HS_NoArgsCmd_t
+
+         \par Command Verification
+              Successful execution of this command may be verified with
+              the following telemetry:
+              - #HS_HkPacket_t.CmdCount will increment
+              - #HS_HkPacket_t.CurrentAppMonState will be set to Disabled
+              - The #HS_DISABLE_APPMON_DBG_EID informational event message will be
+                generated when the command is executed
+
+         \par Error Conditions
+              This command may fail for the following reason(s):
+              - Command packet length not as expected
+
+         \par Evidence of failure may be found in the following telemetry:
+              - #HS_HkPacket_t.CmdErrCount will increment
+              - Error specific event message #HS_LEN_ERR_EID
+
+         \par Criticality
+              None
+
+         \sa #HS_ENABLE_APPMON_CC
+        </LongDescription>
+        <ConstraintSet>
+          <ValueConstraint entry="Sec.FunctionCode" value="3" />
+        </ConstraintSet>
+      </ContainerDataType>
+
+      <ContainerDataType name="EnableEventMonCmd" baseType="CMD">
+        <LongDescription>
+         \fmcmd Enable Events Monitor
+
+         \par Description
+              Enables the Events Monitor
+
+         \par Command Structure
+              #HS_NoArgsCmd_t
+
+         \par Command Verification
+              Successful execution of this command may be verified with
+              the following telemetry:
+              - #HS_HkPacket_t.CmdCount will increment
+              - #HS_HkPacket_t.CurrentEventMonState will be set to Enabled
+              - The #HS_ENABLE_EVENTMON_DBG_EID informational event message will be
+                generated when the command is executed
+
+         \par Error Conditions
+              This command may fail for the following reason(s):
+              - Command packet length not as expected
+
+         \par Evidence of failure may be found in the following telemetry:
+              - #HS_HkPacket_t.CmdErrCount will increment
+              - Error specific event message #HS_LEN_ERR_EID
+
+         \par Criticality
+              None
+
+         \sa #HS_DISABLE_EVENTMON_CC
+        </LongDescription>
+        <ConstraintSet>
+          <ValueConstraint entry="Sec.FunctionCode" value="4" />
+        </ConstraintSet>
+      </ContainerDataType>
+
+      <ContainerDataType name="DisableEventMonCmd" baseType="CMD">
+        <LongDescription>
+         \fmcmd Disable Events Monitor
+
+         \par Description
+              Disables the Events Monitor
+
+         \par Command Structure
+              #HS_NoArgsCmd_t
+
+         \par Command Verification
+              Successful execution of this command may be verified with
+              the following telemetry:
+              - #HS_HkPacket_t.CmdCount will increment
+              - #HS_HkPacket_t.CurrentEventMonState will be set to Disabled
+              - The #HS_DISABLE_EVENTMON_DBG_EID informational event message will be
+                generated when the command is executed
+
+         \par Error Conditions
+              This command may fail for the following reason(s):
+              - Command packet length not as expected
+
+         \par Evidence of failure may be found in the following telemetry:
+              - #HS_HkPacket_t.CmdErrCount will increment
+              - Error specific event message #HS_LEN_ERR_EID
+
+         \par Criticality
+              None
+
+         \sa #HS_ENABLE_EVENTMON_CC
+        </LongDescription>
+        <ConstraintSet>
+          <ValueConstraint entry="Sec.FunctionCode" value="5" />
+        </ConstraintSet>
+      </ContainerDataType>
+
+      <ContainerDataType name="EnableAlivenessCmd" baseType="CMD">
+        <LongDescription>
+         \fmcmd Enable Aliveness Indicator
+
+         \par Description
+              Enables the Aliveness Indicator UART output
+
+         \par Command Structure
+              #HS_NoArgsCmd_t
+
+         \par Command Verification
+              Successful execution of this command may be verified with
+              the following telemetry:
+              - #HS_HkPacket_t.CmdCount will increment
+              - #HS_HkPacket_t.CurrentAlivenessState will be set to Enabled
+              - The #HS_ENABLE_ALIVENESS_DBG_EID informational event message will be
+                generated when the command is executed
+
+         \par Error Conditions
+              This command may fail for the following reason(s):
+              - Command packet length not as expected
+
+         \par Evidence of failure may be found in the following telemetry:
+              - #HS_HkPacket_t.CmdErrCount will increment
+              - Error specific event message #HS_LEN_ERR_EID
+
+         \par Criticality
+              None
+
+         \sa #HS_DISABLE_ALIVENESS_CC
+        </LongDescription>
+        <ConstraintSet>
+          <ValueConstraint entry="Sec.FunctionCode" value="6" />
+        </ConstraintSet>
+      </ContainerDataType>
+
+      <ContainerDataType name="DisableAlivenessCmd" baseType="CMD">
+        <LongDescription>
+         \fmcmd Disable Aliveness Indicator
+
+         \par Description
+              Disables the Aliveness Indicator UART output
+
+         \par Command Structure
+              #HS_NoArgsCmd_t
+
+         \par Command Verification
+              Successful execution of this command may be verified with
+              the following telemetry:
+              - #HS_HkPacket_t.CmdCount will increment
+              - #HS_HkPacket_t.CurrentAlivenessState will be set to Disabled
+              - The #HS_DISABLE_ALIVENESS_DBG_EID informational event message will be
+                generated when the command is executed
+
+         \par Error Conditions
+              This command may fail for the following reason(s):
+              - Command packet length not as expected
+
+         \par Evidence of failure may be found in the following telemetry:
+              - #HS_HkPacket_t.CmdErrCount will increment
+              - Error specific event message #HS_LEN_ERR_EID
+
+         \par Criticality
+              None
+
+         \sa #HS_ENABLE_ALIVENESS_CC
+        </LongDescription>
+        <ConstraintSet>
+          <ValueConstraint entry="Sec.FunctionCode" value="7" />
+        </ConstraintSet>
+      </ContainerDataType>
+
+      <ContainerDataType name="ResetResetsPerformedCmd" baseType="CMD">
+        <LongDescription>
+         \fmcmd Reset Processor Resets Performed Count
+
+         \par Description
+              Resets the count of HS performed resets maintained by HS
+
+         \par Command Structure
+              #HS_NoArgsCmd_t
+
+         \par Command Verification
+              Successful execution of this command may be verified with
+              the following telemetry:
+              - #HS_HkPacket_t.CmdCount will increment
+              - #HS_HkPacket_t.ResetsPerformed will be set to 0
+              - The #HS_RESET_RESETS_DBG_EID informational event message will be
+                generated when the command is executed
+
+         \par Error Conditions
+              This command may fail for the following reason(s):
+              - Command packet length not as expected
+
+         \par Evidence of failure may be found in the following telemetry:
+              - #HS_HkPacket_t.CmdErrCount will increment
+              - Error specific event message #HS_LEN_ERR_EID
+
+         \par Criticality
+              None
+
+         \sa #HS_SET_MAX_RESETS_CC
+        </LongDescription>
+        <ConstraintSet>
+          <ValueConstraint entry="Sec.FunctionCode" value="8" />
+        </ConstraintSet>
+      </ContainerDataType>
+
+      <ContainerDataType name="SetMaxResetsCmd" baseType="CMD">
+        <LongDescription>
+         \fmcmd Set Max Processor Resets Performed Count
+
+         \par Description
+              Sets the max allowable count of processor resets to the provided value
+
+         \par Command Structure
+              #HS_SetMaxResetsCmd_t
+
+         \par Command Verification
+              Successful execution of this command may be verified with
+              the following telemetry:
+              - #HS_HkPacket_t.CmdCount will increment
+              - #HS_HkPacket_t.MaxResets will be set to the provided value
+              - The #HS_SET_MAX_RESETS_DBG_EID informational event message will be
+                generated when the command is executed
+
+         \par Error Conditions
+              This command may fail for the following reason(s):
+              - Command packet length not as expected
+
+         \par Evidence of failure may be found in the following telemetry:
+              - #HS_HkPacket_t.CmdErrCount will increment
+              - Error specific event message #HS_LEN_ERR_EID
+
+         \par Criticality
+              None
+
+         \sa #HS_RESET_RESETS_PERFORMED_CC
+        </LongDescription>
+        <ConstraintSet>
+          <ValueConstraint entry="Sec.FunctionCode" value="9" />
+        </ConstraintSet>
+        <EntryList>
+          <Entry type="SetMaxResets_Payload" name="Payload" />
+        </EntryList>
+      </ContainerDataType>
+
+      <ContainerDataType name="EnableCPUHogCmd" baseType="CMD">
+        <LongDescription>
+         \fmcmd Enable CPU Hogging Indicator
+
+         \par Description
+              Enables the CPU Hogging Indicator Event Message
+
+         \par Command Structure
+              #HS_NoArgsCmd_t
+
+         \par Command Verification
+              Successful execution of this command may be verified with
+              the following telemetry:
+              - #HS_HkPacket_t.CmdCount will increment
+              - #HS_HkPacket_t.CurrentCPUHogState will be set to Enabled
+              - The #HS_ENABLE_CPUHOG_DBG_EID informational event message will be
+                generated when the command is executed
+
+         \par Error Conditions
+              This command may fail for the following reason(s):
+              - Command packet length not as expected
+
+         \par Evidence of failure may be found in the following telemetry:
+              - #HS_HkPacket_t.CmdErrCount will increment
+              - Error specific event message #HS_LEN_ERR_EID
+
+         \par Criticality
+              None
+
+         \sa #HS_DISABLE_CPUHOG_CC
+        </LongDescription>
+        <ConstraintSet>
+          <ValueConstraint entry="Sec.FunctionCode" value="10" />
+        </ConstraintSet>
+      </ContainerDataType>
+
+      <ContainerDataType name="DisableCPUHogCmd" baseType="CMD">
+        <LongDescription>
+         \fmcmd Disable CPU Hogging Indicator
+
+         \par Description
+              Disables the CPU Hogging Indicator Event Message
+
+         \par Command Structure
+              #HS_NoArgsCmd_t
+
+         \par Command Verification
+              Successful execution of this command may be verified with
+              the following telemetry:
+              - #HS_HkPacket_t.CmdCount will increment
+              - #HS_HkPacket_t.CurrentCPUHogState will be set to Disabled
+              - The #HS_DISABLE_CPUHOG_DBG_EID informational event message will be
+                generated when the command is executed
+
+         \par Error Conditions
+              This command may fail for the following reason(s):
+              - Command packet length not as expected
+
+         \par Evidence of failure may be found in the following telemetry:
+              - #HS_HkPacket_t.CmdErrCount will increment
+              - Error specific event message #HS_LEN_ERR_EID
+
+         \par Criticality
+              None
+
+         \sa #HS_ENABLE_CPUHOG_CC
+        </LongDescription>
+        <ConstraintSet>
+          <ValueConstraint entry="Sec.FunctionCode" value="11" />
+        </ConstraintSet>
+      </ContainerDataType>
+
+  </DataTypeSet>
+
+    <ComponentSet>
+      <Component name="Application">
+        <RequiredInterfaceSet>
+          <Interface name="CMD" shortDescription="HS Ground Commands Message ID" type="CFE_SB/Telecommand">
+            <GenericTypeMapSet>
+              <GenericTypeMap name="TelecommandDataType" type="CMD" />
+            </GenericTypeMapSet>
+          </Interface>
+          <Interface name="SEND_HK" shortDescription="HS Send Hk Data Cmd Message ID" type="CFE_SB/Telecommand">
+            <!-- This uses a bare spacepacket with no payload -->
+            <GenericTypeMapSet>
+              <GenericTypeMap name="TelecommandDataType" type="HousekeepingCmd" />
+            </GenericTypeMapSet>
+          </Interface>
+          <Interface name="WAKEUP" shortDescription="Msg ID to wake up HS " type="CFE_SB/Telecommand">
+            <GenericTypeMapSet>
+              <GenericTypeMap name="TelecommandDataType" type="CFE_HDR/CommandHeader" />
+            </GenericTypeMapSet>
+          </Interface>
+          <Interface name="HK_TLM" shortDescription="HS Hk Telemetry Message ID" type="CFE_SB/Telemetry">
+            <GenericTypeMapSet>
+              <GenericTypeMap name="TelemetryDataType" type="HousekeepingPkt" />
+            </GenericTypeMapSet>
+          </Interface>
+        </RequiredInterfaceSet>
+        <Implementation>
+          <VariableSet>
+            <Variable type="BASE_TYPES/uint16" readOnly="true" name="CmdTopicId" initialValue="${CFE_MISSION/HS_CMD_TOPICID}" />
+            <Variable type="BASE_TYPES/uint16" readOnly="true" name="SendHkTopicId" initialValue="${CFE_MISSION/HS_SEND_HK_TOPICID}" />
+            <Variable type="BASE_TYPES/uint16" readOnly="true" name="WakeupTopicId" initialValue="${CFE_MISSION/HS_WAKEUP_TOPICID}" />
+            <Variable type="BASE_TYPES/uint16" readOnly="true" name="HkTlmTopicId" initialValue="${CFE_MISSION/HS_HK_TLM_TOPICID}" />
+          </VariableSet>
+          <!-- Assign fixed numbers to the "TopicId" parameter of each interface -->
+          <ParameterMapSet>
+            <ParameterMap interface="CMD" parameter="TopicId" variableRef="CmdTopicId" />
+            <ParameterMap interface="SEND_HK" parameter="TopicId" variableRef="SendHkTopicId" />
+            <ParameterMap interface="WAKEUP" parameter="TopicId" variableRef="WakeupTopicId" />
+            <ParameterMap interface="HK_TLM" parameter="TopicId" variableRef="HkTlmTopicId" />
+          </ParameterMapSet>
+        </Implementation>
+      </Component>
+    </ComponentSet>
+  </Package>
+</PackageFile>

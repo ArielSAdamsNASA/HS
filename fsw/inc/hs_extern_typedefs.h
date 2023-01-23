@@ -38,7 +38,11 @@
 ** specifically it must be 32 bits in the XCT to align Resource Type, while it can be 16 bits
 ** in the other two.
 */
+#ifdef CFE_EDS_ENABLED_BUILD
 
+#include <hs_eds_typedefs.h>
+
+#else
 /**
  *  \brief Application Monitor Table (AMT) Entry
  */
@@ -89,5 +93,7 @@ typedef struct
     uint16         Cooldown;    /**< \brief Minimum rate at which message can be sent */
     HS_MATMsgBuf_t MsgBuf;      /**< \brief Message to be sent */
 } HS_MATEntry_t;
+
+#endif
 
 #endif /* HS_EXTERN_TYPEDEFS_H */
